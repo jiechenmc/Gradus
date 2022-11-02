@@ -13,4 +13,4 @@ async def login(page, login, password):
     await content.click("button >> nth=0")
 
     # Wait for me to authenticate
-    print("Waiting 10 seconds for DUO Authentication on device ...")
+    print("Waiting 5 seconds for DUO Authentication on device ...")

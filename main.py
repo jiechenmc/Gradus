@@ -2,7 +2,9 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from playwright.async_api import async_playwright
+from playwright._impl._api_types import TimeoutError
 from core.login import login
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -10,6 +12,7 @@ load_dotenv()
 async def run(playwright):
     browser = await playwright.chromium.launch()
     page = await browser.new_page()
+    page.set_default_timeout(5000)
 
     netid = os.getenv("netid")
     password = os.getenv("netid_password")
@@ -27,9 +30,23 @@ async def run(playwright):
     # Click The Go Button
     await page.click("text=Go")
 
-    await page.wait_for_load_state('domcontentloaded')
-    await page.screenshot(path="screenshot.png")
-    await browser.close()
+    while True:
+        try:
+            await page.wait_for_load_state('domcontentloaded')
+            # Extract all classes on current page
+            links = page.locator("td a")
+            classes = await links.all_inner_texts()
+            classes = list(filter(lambda x: x[-1].isnumeric(), classes))
+            print(classes)
+
+            await page.screenshot(path="screenshot.png")
+            await page.click("text=Next >")
+            break
+        except TimeoutError:
+            url = page.url
+            print(url)
+            await browser.close()
+            break
 
 
 async def main():
