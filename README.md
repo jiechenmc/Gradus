@@ -1,6 +1,7 @@
 # Gradus
 
 #### Setting up
+- Create .env as defined in example.env
 ```bash
 pip install -r requirements.txt
 ```
