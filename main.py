@@ -14,7 +14,7 @@ async def run(playwright):
     # Playwright Setup
     browser = await playwright.chromium.launch()
     page = await browser.new_page()
-    page.set_default_timeout(30000)
+    page.set_default_timeout(5000)
 
     netid = os.getenv("netid")
     password = os.getenv("netid_password")
