@@ -11,4 +11,6 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+- A cache will be created at "./.cache" with the current page number when DUO session expires after 30 minutes
+- The cached url allows the script to pick up exactly where you left off of
 ####
