@@ -55,19 +55,17 @@ async def run(playwright):
                 element = page.locator(f"text={cls}")
                 count = await element.count()
 
-                if count > 1:
-                    if cls in visited:
-                        continue
-                    else:
-                        for i in range(count):
-                            url = await element.nth(i).get_attribute("href")
-                            await page.goto(f"{base_url}{url}")
+                if count > 1 and cls not in visited:
+                    for i in range(count):
+                        url = await element.nth(i).get_attribute("href")
+                        await page.goto(f"{base_url}{url}")
 
-                            write_data = await extract_data(page, cls, term)
-                            collection.insert_one(write_data)
-                            print(write_data)
-                            await page.goto(current_page)
-                        visited.add(cls)
+                        write_data = await extract_data(page, cls, term)
+                        collection.insert_one(write_data)
+                        print(write_data)
+                        await page.goto(current_page)
+
+                    visited.add(cls)
                 else:
                     url = await element.get_attribute("href")
                     await page.goto(f"{base_url}{url}")
@@ -81,8 +79,7 @@ async def run(playwright):
             # Navigate to next page
             await page.click("text=Next >")
         except TimeoutError as e:
-            print(page.url)
-            print(e)
+            print(f"{e}\nVerify that last page is: {page.url}")
             await browser.close()
             break
 
