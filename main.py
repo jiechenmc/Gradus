@@ -4,24 +4,28 @@ from dotenv import load_dotenv
 from playwright.async_api import async_playwright
 from playwright._impl._api_types import TimeoutError
 from core.login import login
-from bs4 import BeautifulSoup
+from core.page import extract_data
+from pymongo import MongoClient
 
 load_dotenv()
 
 
 async def run(playwright):
+    # Playwright Setup
     browser = await playwright.chromium.launch()
     page = await browser.new_page()
-    page.set_default_timeout(5000)
+    page.set_default_timeout(30000)
 
     netid = os.getenv("netid")
     password = os.getenv("netid_password")
+    base_url = "https://classie-evals.stonybrook.edu/"
 
-    await page.goto("https://classie-evals.stonybrook.edu/")
+    await page.goto(base_url)
 
     # Trigger Duo SSO
-    await login(page, netid, password)
-    await asyncio.sleep(5)
+    sleep = 5
+    await login(page, netid, password, sleep)
+    await asyncio.sleep(sleep)
 
     # Select the latest term
     term_box = page.locator("#SearchTerm")
@@ -29,22 +33,56 @@ async def run(playwright):
 
     # Click The Go Button
     await page.click("text=Go")
+    term = await page.locator("h2").inner_text()
+
+    # Mongo Setup
+    client = MongoClient(os.getenv("mongo_url"))
+    db = client.get_database("Gradus")
+    collection = db.get_collection("grades")
 
     while True:
         try:
             await page.wait_for_load_state('domcontentloaded')
+            current_page = page.url
             # Extract all classes on current page
             links = page.locator("td a")
             classes = await links.all_inner_texts()
             classes = list(filter(lambda x: x[-1].isnumeric(), classes))
-            print(classes)
+            visited = set()
 
-            await page.screenshot(path="screenshot.png")
+            for cls in classes:
+                # Go to the class specific page
+                element = page.locator(f"text={cls}")
+                count = await element.count()
+
+                if count > 1:
+                    if cls in visited:
+                        continue
+                    else:
+                        for i in range(count):
+                            url = await element.nth(i).get_attribute("href")
+                            await page.goto(f"{base_url}{url}")
+
+                            write_data = await extract_data(page, cls, term)
+                            collection.insert_one(write_data)
+                            print(write_data)
+                            await page.goto(current_page)
+                        visited.add(cls)
+                else:
+                    url = await element.get_attribute("href")
+                    await page.goto(f"{base_url}{url}")
+
+                    write_data = await extract_data(page, cls, term)
+                    collection.insert_one(write_data)
+                    print(write_data)
+
+                await page.goto(current_page)
+
+            # Navigate to next page
             await page.click("text=Next >")
-            break
-        except TimeoutError:
-            url = page.url
-            print(url)
+        except TimeoutError as e:
+            print(page.url)
+            print(e)
             await browser.close()
             break
 

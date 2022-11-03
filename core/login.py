@@ -1,4 +1,4 @@
-async def login(page, login, password):
+async def login(page, login, password, wait):
     ## Filling in NetID
     await page.fill("text=Username", login)
     await page.fill("text=Password >> nth=1", password)
@@ -13,4 +13,4 @@ async def login(page, login, password):
     await content.click("button >> nth=0")
 
     # Wait for me to authenticate
-    print("Waiting 5 seconds for DUO Authentication on device ...")
+    print(f"Waiting {wait} seconds for DUO Authentication on device ...")
