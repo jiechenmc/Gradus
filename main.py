@@ -38,7 +38,7 @@ async def run(playwright):
     # Mongo Setup
     client = MongoClient(os.getenv("mongo_url"))
     db = client.get_database("Gradus")
-    collection = db.get_collection("grades")
+    collection = db.get_collection(term)
 
     while True:
         try:
