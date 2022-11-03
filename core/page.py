@@ -1,3 +1,6 @@
+from json import dumps
+
+
 async def extract_data(page, cls, term):
     # Obtaining data and parsing it into a dictionary
     td = page.locator("table").first.locator("td")
@@ -18,3 +21,9 @@ async def extract_data(page, cls, term):
     }
 
     return write_data
+
+
+async def nav_and_extract(page, nav, cls, term, f):
+    await page.goto(nav)
+    write_data = await extract_data(page, cls, term)
+    f.write(dumps(write_data) + "\n")
