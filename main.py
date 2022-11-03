@@ -29,7 +29,7 @@ async def run(playwright):
 
     # Select the latest term
     term_box = page.locator("#SearchTerm")
-    await term_box.select_option(index=1)
+    await term_box.select_option(index=2)
 
     # Click The Go Button
     await page.click("text=Go")
@@ -66,6 +66,8 @@ async def run(playwright):
                         await page.goto(current_page)
 
                     visited.add(cls)
+                elif count > 1:
+                    continue
                 else:
                     url = await element.get_attribute("href")
                     await page.goto(f"{base_url}{url}")
