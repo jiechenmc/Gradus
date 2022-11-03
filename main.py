@@ -78,10 +78,12 @@ async def run(playwright):
                     if count > 1 and cls not in visited:
                         for i in range(count):
                             url = await element.nth(i).get_attribute("href")
-                            await page.goto(f"{base_url}{url}")
-
-                            write_data = await extract_data(page, cls, term)
-                            f.write(dumps(write_data) + "\n")
+                            if url != "":
+                                nav = f"{base_url}{url}"
+                                await page.goto(nav)
+                                write_data = await extract_data(
+                                    page, cls, term)
+                                f.write(dumps(write_data) + "\n")
                             await page.goto(current_page)
 
                         visited.add(cls)
@@ -89,10 +91,12 @@ async def run(playwright):
                         continue
                     else:
                         url = await element.get_attribute("href")
-                        await page.goto(f"{base_url}{url}")
+                        if url != "":
+                            nav = f"{base_url}{url}"
+                            await page.goto(nav)
 
-                        write_data = await extract_data(page, cls, term)
-                        f.write(dumps(write_data) + "\n")
+                            write_data = await extract_data(page, cls, term)
+                            f.write(dumps(write_data) + "\n")
                 await page.goto(current_page)
 
             # Navigate to next page
