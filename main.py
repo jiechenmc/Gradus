@@ -5,8 +5,7 @@ from playwright.async_api import async_playwright
 from playwright._impl._api_types import TimeoutError
 from core.login import login
 from core.page import extract_data
-from pymongo import MongoClient
-from json import dumps
+from json import dumps, loads
 
 load_dotenv()
 
@@ -15,7 +14,7 @@ async def run(playwright):
     # Playwright Setup
     browser = await playwright.chromium.launch()
     page = await browser.new_page()
-    page.set_default_timeout(5000)
+    page.set_default_timeout(10000)
 
     netid = os.getenv("netid")
     password = os.getenv("netid_password")
@@ -29,23 +28,29 @@ async def run(playwright):
     await asyncio.sleep(sleep)
 
     # Simple cache
-    with open(".cache", "w+") as f:
-        curr = f.readline()
-        if not curr:
-            # Select the term
-            # index 1 will be the most recent term
-            term_box = page.locator("#SearchTerm")
-            await term_box.select_option(index=2)
+    cache_file = ".cache"
+    loaded_cache = False
+    try:
+        with open(cache_file, "r") as f:
+            curr = f.readline()
+            if not curr:
+                # Select the term
+                # index 1 will be the most recent term
+                term_box = page.locator("#SearchTerm")
+                await term_box.select_option(index=2)
 
-            # Click The Go Button
-            await page.click("text=Go")
-            term = await page.locator("h2").inner_text()
-        else:
-            await page.goto(curr)
-    # Mongo Setup
-    # client = MongoClient(os.getenv("mongo_url"))
-    # db = client.get_database("Gradus")
-    # collection = db.get_collection(term)
+                # Click The Go Button
+                await page.click("text=Go")
+            else:
+                await page.goto(curr)
+                loaded_cache = True
+    except FileNotFoundError:
+        term_box = page.locator("#SearchTerm")
+        await term_box.select_option(index=2)
+
+        # Click The Go Button
+        await page.click("text=Go")
+    term = await page.locator("h2").inner_text()
 
     while True:
         try:
@@ -58,6 +63,13 @@ async def run(playwright):
             visited = set()
 
             for cls in classes:
+                # Fastforward to the latest entry on the page
+                if loaded_cache:
+                    with open("data.json", "r") as f:
+                        sec = loads(f.readlines()[-1])["Section"]
+                        if cls == sec:
+                            loaded_cache = False
+                        continue
                 # Go to the class specific page
                 element = page.locator(f"text={cls}")
                 count = await element.count()
@@ -87,7 +99,8 @@ async def run(playwright):
             await page.click("text=Next >")
         except TimeoutError as e:
             print(f"{e}\nVerify that last page is: {page.url}")
-            with open(".cache", "w+") as f:
+            # Saves the current page into cache
+            with open(cache_file, "w+") as f:
                 f.write(current_page)
             await browser.close()
             break
