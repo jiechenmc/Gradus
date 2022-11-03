@@ -6,6 +6,7 @@ from playwright._impl._api_types import TimeoutError
 from core.login import login
 from core.page import extract_data
 from pymongo import MongoClient
+from json import dumps
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ async def run(playwright):
 
     netid = os.getenv("netid")
     password = os.getenv("netid_password")
-    base_url = "https://classie-evals.stonybrook.edu/"
+    base_url = "https://classie-evals.stonybrook.edu"
 
     await page.goto(base_url)
 
@@ -27,18 +28,24 @@ async def run(playwright):
     await login(page, netid, password, sleep)
     await asyncio.sleep(sleep)
 
-    # Select the latest term
-    term_box = page.locator("#SearchTerm")
-    await term_box.select_option(index=2)
+    # Simple cache
+    with open(".cache", "w+") as f:
+        curr = f.readline()
+        if not curr:
+            # Select the term
+            # index 1 will be the most recent term
+            term_box = page.locator("#SearchTerm")
+            await term_box.select_option(index=2)
 
-    # Click The Go Button
-    await page.click("text=Go")
-    term = await page.locator("h2").inner_text()
-
+            # Click The Go Button
+            await page.click("text=Go")
+            term = await page.locator("h2").inner_text()
+        else:
+            await page.goto(curr)
     # Mongo Setup
-    client = MongoClient(os.getenv("mongo_url"))
-    db = client.get_database("Gradus")
-    collection = db.get_collection(term)
+    # client = MongoClient(os.getenv("mongo_url"))
+    # db = client.get_database("Gradus")
+    # collection = db.get_collection(term)
 
     while True:
         try:
@@ -55,33 +62,33 @@ async def run(playwright):
                 element = page.locator(f"text={cls}")
                 count = await element.count()
 
-                if count > 1 and cls not in visited:
-                    for i in range(count):
-                        url = await element.nth(i).get_attribute("href")
+                with open("data.json", "a+") as f:
+                    if count > 1 and cls not in visited:
+                        for i in range(count):
+                            url = await element.nth(i).get_attribute("href")
+                            await page.goto(f"{base_url}{url}")
+
+                            write_data = await extract_data(page, cls, term)
+                            f.write(dumps(write_data) + "\n")
+                            await page.goto(current_page)
+
+                        visited.add(cls)
+                    elif count > 1:
+                        continue
+                    else:
+                        url = await element.get_attribute("href")
                         await page.goto(f"{base_url}{url}")
 
                         write_data = await extract_data(page, cls, term)
-                        collection.insert_one(write_data)
-                        print(write_data)
-                        await page.goto(current_page)
-
-                    visited.add(cls)
-                elif count > 1:
-                    continue
-                else:
-                    url = await element.get_attribute("href")
-                    await page.goto(f"{base_url}{url}")
-
-                    write_data = await extract_data(page, cls, term)
-                    collection.insert_one(write_data)
-                    print(write_data)
-
+                        f.write(dumps(write_data) + "\n")
                 await page.goto(current_page)
 
             # Navigate to next page
             await page.click("text=Next >")
         except TimeoutError as e:
             print(f"{e}\nVerify that last page is: {page.url}")
+            with open(".cache", "w+") as f:
+                f.write(current_page)
             await browser.close()
             break
 
