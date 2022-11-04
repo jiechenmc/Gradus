@@ -16,7 +16,7 @@ python main.py
 - .cache should be removed if you do not intend to continue where you left off of
 ####
 
-#### Migrating to MongoDB Atlas
+#### Migrating data to MongoDB Atlas
 ```bash
 python migrate.py
 ```
