@@ -13,7 +13,7 @@ python main.py
 ```
 - A cache will be created as a file `.cache` with the current page url if any exceptions arise
 - The cached url allows the script to pick up exactly where you left off of
-- .cache should be removed if you do not intend to continue where you left off of
+- `.cache` should be removed if you do not intend to continue where you left off of
 ####
 
 #### Migrating data to MongoDB Atlas
