@@ -4,9 +4,8 @@ from dotenv import load_dotenv
 from playwright.async_api import async_playwright
 from playwright._impl._api_types import TimeoutError
 from core.login import login
-from core.page import extract_data, nav_and_extract
+from core.page import nav_and_extract
 from core.cache import fast_forward
-from json import dumps, loads
 
 load_dotenv()
 
@@ -43,7 +42,7 @@ async def run(playwright):
         # Select the term
         # index 1 will be the most recent term
         term_box = page.locator("#SearchTerm")
-        await term_box.select_option(index=3)
+        await term_box.select_option(index=4)
 
         # Click The Go Button
         await page.click("text=Go")
@@ -53,9 +52,9 @@ async def run(playwright):
 
     while True:
         try:
+            current_page = page.url
             await page.wait_for_load_state('domcontentloaded')
             term = await page.locator("h2").inner_text()
-            current_page = page.url
             # Extract all classes on current page
             links = page.locator("td a")
             classes = await links.all_inner_texts()
