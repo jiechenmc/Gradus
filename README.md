@@ -20,5 +20,5 @@ python main.py
 ```bash
 python migrate.py
 ```
-- After migrating, you can safely delete data.json
+- After verifying the migration, you can safely delete data.json and .cache
 ####
