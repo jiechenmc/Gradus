@@ -20,5 +20,5 @@ python main.py
 ```bash
 python migrate.py
 ```
-- Make sure .env is filled out before migrating
+- After migrating, you can safely delete data.json
 ####
