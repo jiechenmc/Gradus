@@ -2,6 +2,9 @@ from json import dumps
 
 
 async def extract_data(page, cls, term):
+    # Check if grade distribution data is available
+    first_chart_heading = await page.locator("h4").first.inner_text()
+
     # Obtaining data and parsing it into a dictionary
     td = page.locator("table").first.locator("td")
     data = await td.all_inner_texts()
@@ -12,13 +15,22 @@ async def extract_data(page, cls, term):
     title = await page.locator("h2").inner_text()
     professors = await page.locator("h2 + h3").inner_text()
 
-    write_data = {
-        "Section": cls,
-        "Term": term,
-        "Course Title": title,
-        "Instructors": professors,
-        "Grades": dict(zip(keys, values))
-    }
+    if first_chart_heading != "Grade Data Unavailable":
+        write_data = {
+            "Section": cls,
+            "Term": term,
+            "Course Title": title,
+            "Instructors": professors,
+            "Grades": dict(zip(keys, values))
+        }
+    else:
+        write_data = {
+            "Section": cls,
+            "Term": term,
+            "Course Title": title,
+            "Instructors": professors,
+            "Grades": {}
+        }
 
     return write_data
 
