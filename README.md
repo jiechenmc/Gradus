@@ -1,5 +1,4 @@
-# Gradus 
-# [Gradus API](https://github.com/jiechenmc/Gradus-API)
+# Gradus [API](https://github.com/jiechenmc/Gradus-API)
 #### Setting up
 ```bash
 pip install -r requirements.txt
