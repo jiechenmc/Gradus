@@ -42,7 +42,7 @@ async def run(playwright):
         # Select the term
         # index 1 will be the most recent term
         term_box = page.locator("#SearchTerm")
-        await term_box.select_option(index=4)
+        await term_box.select_option(index=int(os.getenv("term_index")))
 
         # Click The Go Button
         await page.click("text=Go")
