@@ -95,8 +95,9 @@ async def run(playwright):
         except Exception as e:
             print(f"{e}\nVerify that last page is: {page.url}")
             # Saves the current page into cache
-            with open(cache_file, "w+") as f:
-                f.write(current_page)
+            if current_page != "https://sso.cc.stonybrook.edu/idp/profile/cas/login?execution=e2s1":
+                with open(cache_file, "w+") as f:
+                    f.write(current_page)
             await browser.close()
             break
 
