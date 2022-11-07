@@ -4,6 +4,7 @@
 pip install -r requirements.txt
 ```
 - Create .env as defined in example.env before running the following command
+- When scraping, index 1 is the latest term.
 ####
 
 #### Running the script
