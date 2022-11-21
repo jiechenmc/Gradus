@@ -13,23 +13,23 @@ async def extract_data(page, cls, term):
     values = map(int, data[1::2])
 
     title = await page.locator("h2").inner_text()
-    professors = await page.locator("h2 + h3").inner_text()
+    professor = await page.locator("h2 + h3").inner_text()
 
     if first_chart_heading != "Grade Data Unavailable":
         write_data = {
-            "Section": cls,
-            "Term": term,
-            "Course Title": title,
-            "Instructors": professors,
-            "Grades": dict(zip(keys, values))
+            "section": cls,
+            "term": term,
+            "courseTitle": title,
+            "instructor": professor,
+            "grades": dict(zip(keys, values))
         }
     else:
         write_data = {
-            "Section": cls,
-            "Term": term,
-            "Course Title": title,
-            "Instructors": professors,
-            "Grades": {}
+            "section": cls,
+            "term": term,
+            "courseTitle": title,
+            "instructor": professor,
+            "grades": {}
         }
 
     return write_data

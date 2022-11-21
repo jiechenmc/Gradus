@@ -10,8 +10,11 @@ async def login(page, login, password, wait):
     # Clicking the send push notification to log in
     frame = await page.query_selector("#duo_iframe")
     content = await frame.content_frame()
-    await content.check("input[name=dampen_choice]")
-    await content.click("button >> nth=0")
+    await page.screenshot(path="screenshot.png")
+
+    # uncomment this; if duo auto send push is not enabled
+    # await content.check("input[name=dampen_choice]")
+    # await content.click("button >> nth=0")
 
     # Wait for me to authenticate
     print(f"Waiting {wait} seconds for DUO Authentication on device ...")
