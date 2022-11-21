@@ -11,7 +11,7 @@ db = client.get_database(os.getenv("mongo_db"))
 with open("data.json", "r") as f:
     lines = f.readlines()
     data = list(map(loads, lines))
-    collection = db.get_collection(data[0]["Term"])
+    collection = db.get_collection(data[0]["term"])
     collection.insert_many(data)
 
 clear = input("Clear .cache and data.json? (y,n) ").lower()
