@@ -93,11 +93,12 @@ async def run(playwright):
             # Navigate to next page
             await page.click("text=Next >")
         except Exception as e:
-            print(f"{e}\nVerify that last page is: {page.url}")
+            print(f"Err: {e}\nVerify that last page is: {page.url}")
             # Saves the current page into cache
             if current_page != "https://sso.cc.stonybrook.edu/idp/profile/cas/login?execution=e2s1":
                 with open(cache_file, "w+") as f:
                     f.write(current_page)
+            await page.screenshot(path="end.png")
             await browser.close()
             break
 

@@ -10,7 +10,6 @@ async def login(page, login, password, wait):
     # Clicking the send push notification to log in
     frame = await page.query_selector("#duo_iframe")
     content = await frame.content_frame()
-    await page.screenshot(path="screenshot.png")
 
     # uncomment this; if duo auto send push is not enabled
     # await content.check("input[name=dampen_choice]")
