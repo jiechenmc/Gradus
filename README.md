@@ -1,10 +1,13 @@
 # Gradus [API](https://github.com/jiechenmc/Gradus-API)
 #### Setting up
-```bash
-pip install -r requirements.txt
-```
 - Create .env as defined in example.env before running the following command
 - When scraping, index 1 is the latest term.
+```bash
+pip install -r requirements.txt
+playwright install # if this is your first time using playwright
+playwright install-deps # if this is your first time using playwright
+```
+
 ####
 
 #### Running the script
